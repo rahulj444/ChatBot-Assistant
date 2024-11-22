@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Application</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+        }
+
+        .chat-container {
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        .chat-box {
+            background-color: #fff;
+            border-radius: 10px;
+            padding: 20px;
+            flex-grow: 1;
+            overflow-y: auto;
+            max-height: 80vh;
+        }
+
+        .message {
+            margin-bottom: 20px;
+            padding: 10px;
+            border-radius: 8px;
+            word-wrap: break-word;
+        }
+
+        .user-message {
+            background-color: #d1f0ff;
+            text-align: right;
+        }
+
+        .bot-message {
+            background-color: #f1f1f1;
+            text-align: left;
+        }
+
+        .input-container {
+            display: flex;
+            padding: 10px;
+            background-color: #fff;
+            border-top: 1px solid #ccc;
+        }
+
+        input[type="text"] {
+            flex-grow: 1;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            margin-right: 10px;
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-box" id="chatBox">
+            <div class="message" id="greetingMessage">
+                <p>Welcome! How can I help you today?</p>
+            </div>
+        </div>
+        <div class="input-container">
+            <input type="text" id="userInput" placeholder="Type your message here..." />
+            <button id="sendMessage">Send</button>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $("#sendMessage").click(function() {
+                let userMessage = $("#userInput").val();
+                if (userMessage) {
+                    appendUserMessage(userMessage);
+                    sendMessageToServer(userMessage);
+                    $("#userInput").val('');
+                }
+            });
+
+            function appendUserMessage(message) {
+                let messageElement = `<div class="message user-message"><p>${message}</p></div>`;
+                $('#chatBox').append(messageElement);
+                scrollToBottom();
+            }
+
+            function appendBotMessage(message) {
+                let messageElement = `<div class="message bot-message"><p>${message}</p></div>`;
+                $('#chatBox').append(messageElement);
+                scrollToBottom();
+            }
+
+            function scrollToBottom() {
+                let chatBox = $('#chatBox');
+                chatBox.scrollTop(chatBox[0].scrollHeight);
+            }
+
+            function sendMessageToServer(message) {
+                $.ajax({
+                    url: '/chat',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({ "message": message }),
+                    success: function(response) {
+                        appendBotMessage(response.response);
+                    },
+                    error: function(error) {
+                        appendBotMessage("Sorry, something went wrong.");
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>
